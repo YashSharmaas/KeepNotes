@@ -1,0 +1,71 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'com.example.yrmultimediaco.keepnotes'
+    compileSdk 33
+
+    defaultConfig {
+        applicationId "com.example.yrmultimediaco.keepnotes"
+        minSdk 24
+        targetSdk 33
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
+
+dependencies {
+
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'com.google.android.material:material:1.9.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+
+    //All Fast Adapter Libraries including material drawer and icons
+    implementation 'com.mikepenz:fastadapter:3.3.1'
+    implementation 'com.mikepenz:fastadapter-commons:3.3.1'
+    implementation 'com.mikepenz:iconics-views:3.2.5'
+    implementation 'com.mikepenz:iconics-core:3.2.5'
+    implementation 'com.mikepenz:community-material-typeface:3.5.95.1@aar'
+    implementation 'com.mikepenz:fastadapter-extensions:3.3.1'
+    implementation 'com.mikepenz:materialize:1.2.0'
+    implementation 'com.mikepenz:materialdrawer:6.1.2'
+
+    //for setting the images
+    implementation 'com.github.bumptech.glide:glide:4.15.1'
+
+    //this is for showing the lottie animations in splash screen
+    implementation 'com.airbnb.android:lottie:6.1.0'
+
+    //Scalable Size Unit for different screen sizes
+    implementation 'com.intuit.sdp:sdp-android:1.0.6'
+    implementation 'com.intuit.ssp:ssp-android:1.0.6'
+
+    implementation 'com.makeramen:roundedimageview:2.3.0'
+    implementation 'com.airbnb.android:lottie:6.1.0'
+    implementation 'com.mikepenz:materialdrawer:6.1.2'
+    //implementation 'com.hanks:passcodeview:0.1.2'
+
+    //implementation 'com.xeoh.android:text-highlighter:1.0.3'
+
+    implementation 'androidx.biometric:biometric:1.1.0'
+    implementation 'com.airbnb.android:lottie:6.1.0'
+
+
+}

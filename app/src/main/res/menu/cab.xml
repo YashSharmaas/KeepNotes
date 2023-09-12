@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/action_close"
+        android:icon="@drawable/baseline_close_24"
+        android:title="Delete"
+        android:background="?attr/colorPrimary"
+        android:titleCondensed="Delete"
+        app:showAsAction="ifRoom|withText" />
+
+    <item
+        android:id="@+id/action_delete"
+        android:icon="@drawable/baseline_delete_24"
+        android:title="Delete"
+        android:background="?attr/colorPrimary"
+        android:titleCondensed="Delete"
+        app:showAsAction="ifRoom|withText" />
+
+<!--<item
+        android:id="@+id/action_share"
+        android:icon="@drawable/baseline_share_24"
+        android:title="Share"
+        android:background="?attr/colorPrimary"
+        android:titleCondensed="Share"
+        app:showAsAction="ifRoom|withText" />-->
+
+   <!-- <item
+        android:id="@+id/bookmark"
+        android:icon="@drawable/baseline_bookmark_add_24"
+        android:title="Bookmaark"
+        android:background="?attr/colorPrimary"
+        android:titleCondensed="Bookmark"
+        app:showAsAction="ifRoom|withText" />-->
+
+</menu>

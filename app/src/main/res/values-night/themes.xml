@@ -1,0 +1,37 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Base.Theme.KeepNotes" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Customize your dark theme here. -->
+
+       <!-- <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimary</item>-->
+        <item name="colorAccent">#FFC63F</item>
+        <item name="windowActionModeOverlay">true</item>
+
+        <!-- MaterialDrawer specific values -->
+        <item name="material_drawer_background">@color/material_drawer_dark_background</item>
+        <item name="material_drawer_primary_text">@color/material_drawer_dark_primary_text</item>
+        <item name="material_drawer_primary_icon">@color/material_drawer_dark_primary_icon</item>
+        <item name="material_drawer_secondary_text">@color/material_drawer_dark_secondary_text</item>
+        <item name="material_drawer_hint_text">@color/material_drawer_dark_hint_text</item>
+        <item name="material_drawer_divider">@color/material_drawer_dark_divider</item>
+        <item name="material_drawer_selected">@color/material_drawer_dark_selected</item> <!-- Material 2 defines 12% alpha, primary color -->
+        <item name="material_drawer_selected_legacy">@color/material_drawer_dark_selected_legacy</item> <!-- Defines the color if legacy style (Material 1, is enabled) -->
+        <item name="material_drawer_selected_text">#FFC63F</item>
+        <item name="material_drawer_header_selection_text">@color/material_drawer_dark_header_selection_text</item>
+        <item name="material_drawer_header_selection_subtext">@color/material_drawer_dark_header_selection_subtext</item>
+        <item name="material_drawer_legacy_style">false</item> <!-- Enables legacy Material 1 style -->
+    </style>
+
+    <style name="SearchView.Dark" parent="Widget.AppCompat.SearchView">
+        <!-- Customize the text color -->
+        <item name="android:textColor">@android:color/black</item>
+        <item name="android:textColorPrimary">@color/md_black_1000</item>
+        <!-- Customize the hint text color -->
+        <item name="android:textColorHint">@android:color/darker_gray</item>
+        <!-- Customize the search icon color -->
+        <item name="android:searchIcon">@drawable/baseline_close_24</item>
+        <item name="iconTint">@color/md_black_1000</item>
+    </style>
+
+</resources>

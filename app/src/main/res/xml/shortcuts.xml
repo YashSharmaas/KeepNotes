@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <shortcut
+        android:shortcutId="compose"
+        android:enabled="true"
+        android:icon="@drawable/baseline_archive_24"
+        app:tint="@color/md_yellow_800"
+        app:iconTint="@color/md_yellow_800"
+        android:iconTint="@color/md_yellow_800"
+        android:color="@color/md_yellow_800"
+        android:shortcutShortLabel="@string/short_name"
+        android:shortcutLongLabel="@string/long_name"
+        android:shortcutDisabledMessage="@string/disable_name">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="com.example.yrmultimediaco.keepnotes"
+            android:targetClass="com.example.yrmultimediaco.keepnotes.ArchivedNotesActivity" />
+        <!-- If your shortcut is associated with multiple intents, include them
+             here. The last intent in the list determines what the user sees when
+             they launch this shortcut. -->
+        <categories android:name="android.shortcut.conversation" />
+        <capability-binding android:key="actions.intent.CREATE_MESSAGE" />
+    </shortcut>
+    <!-- Specify more shortcuts here. -->
+</shortcuts>

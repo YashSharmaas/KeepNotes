@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Keep Notes</string>
+    <string name="action_mode_title"> %d</string>
+    <string name="short_name">Your Archived Notes</string>
+    <string name="long_name">Your Archived Notes</string>
+    <string name="disable_name">Disable Label</string>
+
+</resources>

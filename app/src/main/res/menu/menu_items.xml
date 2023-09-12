@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item android:id="@+id/layoutMode"
+        android:title="Change Layout"
+        android:icon="@drawable/baseline_grid_view_24"
+        android:orderInCategory="100"
+        app:showAsAction="always"
+        />
+
+    <item android:id="@+id/sortByNameAscending"
+        android:title="Sort By Name Ascending"
+        android:orderInCategory="100"
+        app:showAsAction="never"
+        />
+
+ <item android:id="@+id/sortByDateAscending"
+        android:title="Sort By Date Ascending"
+        android:orderInCategory="100"
+        app:showAsAction="never"
+        />
+
+<item android:id="@+id/sortByNameDescending"
+        android:title="Sort By Name Descending"
+        android:orderInCategory="100"
+        app:showAsAction="never"
+        />
+
+<item android:id="@+id/sortByDateDescending"
+        android:title="Sort By Date Descending"
+        android:orderInCategory="100"
+        app:showAsAction="never"
+        />
+
+
+
+</menu>

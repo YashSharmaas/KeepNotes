@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item android:id="@+id/labelRename"
+        android:title="Rename Label"
+        android:icon="@drawable/baseline_edit_note_24"
+        android:orderInCategory="100"
+        app:showAsAction="never"
+        />
+
+    <item android:id="@+id/labelDelete"
+        android:title="Delete Label"
+        android:icon="@drawable/baseline_label_off_24"
+        android:orderInCategory="100"
+        app:showAsAction="never"
+        />
+
+   <!-- <item android:id="@+id/labelAdd"
+        android:title="Add Label"
+        android:orderInCategory="100"
+        app:showAsAction="never"
+        />-->
+
+
+
+</menu>

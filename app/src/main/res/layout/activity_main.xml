@@ -1,0 +1,319 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorPrimary"
+    tools:context=".MainActivity">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appBarLayout2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/colorPrimary" >
+
+            <androidx.appcompat.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                />
+
+            <!--app:menu="@menu/menu_items"-->
+
+            <TextView
+                android:id="@+id/myTextNotes"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="48dp"
+                android:fontFamily="@font/ubuntu_bold"
+                android:gravity="center|center_vertical"
+                android:includeFontPadding="false"
+                android:text="My Notes"
+                android:visibility="gone"
+                android:textColor="@color/colorWhite"
+                android:textSize="@dimen/_20ssp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.514" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <ImageView
+        android:id="@+id/layoutIcon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/_22sdp"
+        android:layout_marginEnd="@dimen/_32sdp"
+        android:src="@drawable/baseline_grid_view_24"
+        app:tint="@color/colorSearchIcon"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@+id/appBarLayout2"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/appBarLayout2" />
+
+    <LinearLayout
+        android:id="@+id/layoutSearch"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/_8sdp"
+        android:layout_marginTop="@dimen/_4sdp"
+        android:layout_marginEnd="@dimen/_8sdp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="@dimen/_10sdp"
+        android:paddingEnd="@dimen/_10sdp"
+        app:layout_constraintTop_toBottomOf="@id/appBarLayout2">
+
+        <!--<ImageView
+            android:layout_width="@dimen/_20sdp"
+            android:layout_height="@dimen/_20sdp"
+            android:contentDescription="@string/app_name"
+            android:src="@drawable/baseline_search_24"
+            app:tint="@color/colorSearchIcon" />-->
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/_35sdp"
+            app:layout_constraintTop_toBottomOf="@id/layoutSearch">
+
+            <androidx.appcompat.widget.SearchView
+                android:id="@+id/searchText"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:imeOptions="actionSearch"
+                android:inputType="text"
+                android:background="@drawable/background_search_view"
+                android:iconifiedByDefault="false"
+                app:queryHint="Search Notes...."
+                app:theme="@style/SearchView.Dark"/>
+        </FrameLayout>
+
+    </LinearLayout>
+
+    <HorizontalScrollView
+        android:id="@+id/layoutCategory"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/_8sdp"
+        android:scrollbars="horizontal"
+        app:layout_constraintTop_toBottomOf="@id/layoutSearch">
+
+        <com.google.android.material.chip.ChipGroup
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipAll"
+                style="@style/Widget.MaterialComponents.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="All Notes" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipImages"
+                style="@style/Widget.MaterialComponents.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Images" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipUrl"
+                style="@style/Widget.MaterialComponents.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="URL" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipFav"
+                style="@style/Widget.MaterialComponents.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Favorites" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipColor"
+                style="@style/Widget.MaterialComponents.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Colors" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipLabel"
+                style="@style/Widget.MaterialComponents.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Add Label" />
+
+
+        </com.google.android.material.chip.ChipGroup>
+
+    </HorizontalScrollView>
+
+        <!-- <FrameLayout
+             android:layout_width="0dp"
+             android:layout_height="wrap_content"
+             android:layout_weight="1">
+
+             <TextView
+                 android:id="@+id/allCategory"
+                 android:layout_width="@dimen/_35sdp"
+                 android:layout_height="@dimen/_35sdp"
+                 android:text="Categories"
+                 android:textColor="@color/md_blue_500"
+                 android:gravity="center" />
+
+         </FrameLayout>
+
+         <FrameLayout
+             android:layout_width="0dp"
+             android:layout_height="wrap_content"
+             android:layout_weight="1">
+
+             <View
+                 android:id="@+id/viewColor1"
+                 android:layout_width="@dimen/_35sdp"
+                 android:layout_height="@dimen/_35sdp"
+                 android:background="@drawable/background_category_note_image"/>
+
+             <ImageView
+                 android:id="@+id/image_category"
+                 android:layout_width="@dimen/_35sdp"
+                 android:layout_height="@dimen/_35sdp"
+                 android:contentDescription="@string/app_name"
+                 android:padding="@dimen/_8sdp"
+                 android:src="@drawable/baseline_image_24"
+                 app:tint="@color/colorWhite" />
+
+         </FrameLayout>
+
+        <FrameLayout
+             android:layout_width="0dp"
+             android:layout_height="wrap_content"
+             android:layout_weight="1">
+
+             <View
+                 android:id="@+id/viewColor2"
+                 android:layout_width="@dimen/_35sdp"
+                 android:layout_height="@dimen/_35sdp"
+                 android:background="@drawable/background_category_note_image"/>
+
+             <ImageView
+                 android:id="@+id/image_link"
+                 android:layout_width="@dimen/_35sdp"
+                 android:layout_height="@dimen/_35sdp"
+                 android:contentDescription="@string/app_name"
+                 android:padding="@dimen/_8sdp"
+                 android:src="@drawable/baseline_web_24"
+                 app:tint="@color/colorWhite" />
+
+         </FrameLayout>-->
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/notesRecView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginStart="@dimen/_2sdp"
+        android:layout_marginEnd="@dimen/_2sdp"
+        android:clipToPadding="false"
+        android:paddingStart="0dp"
+        android:paddingEnd="@dimen/_12sdp"
+        android:paddingBottom="@dimen/_12sdp"
+        app:layout_constraintBottom_toTopOf="@id/layoutQuickActions"
+        app:layout_constraintTop_toBottomOf="@id/layoutCategory" />
+
+    <com.airbnb.lottie.LottieAnimationView
+        android:id="@+id/noFilesFound"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@+id/imageAddNoteMain"
+        app:layout_constraintTop_toBottomOf="@+id/layoutCategory"
+        app:lottie_autoPlay="true"
+        app:lottie_loop="false"
+        android:foregroundGravity="center"
+        app:lottie_rawRes="@raw/empty_lottie"
+        android:visibility="gone"/>
+
+     <com.airbnb.lottie.LottieAnimationView
+        android:id="@+id/noSearchFilesFound"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+         android:foregroundGravity="center"
+        app:layout_constraintBottom_toTopOf="@+id/imageAddNoteMain"
+        app:layout_constraintTop_toBottomOf="@+id/layoutCategory"
+        app:lottie_autoPlay="true"
+        app:lottie_loop="false"
+        app:lottie_rawRes="@raw/search_lottie"
+        android:visibility="gone"/>
+
+    <LinearLayout
+        android:id="@+id/layoutQuickActions"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/colorQuickActionsBackground"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:padding="@dimen/_15sdp"
+        app:layout_constraintBottom_toBottomOf="parent" >
+
+        <ImageView
+            android:id="@+id/imageAddNote"
+            android:layout_width="@dimen/_23sdp"
+            android:layout_height="@dimen/_23sdp"
+            android:layout_marginStart="@dimen/_15sdp"
+            android:contentDescription="@string/app_name"
+            android:src="@drawable/round_add_circle_outline_24"
+            app:tint="@color/colorIcons" />
+
+        <ImageView
+            android:id="@+id/imageAddImageQuick"
+            android:layout_width="@dimen/_23sdp"
+            android:layout_height="@dimen/_23sdp"
+            android:layout_marginStart="@dimen/_15sdp"
+            android:contentDescription="@string/app_name"
+            android:src="@drawable/baseline_image_24"
+            app:tint="@color/colorIcons" />
+
+        <ImageView
+            android:id="@+id/imageAddWeblink"
+            android:layout_width="@dimen/_23sdp"
+            android:layout_height="@dimen/_23sdp"
+            android:layout_marginStart="@dimen/_15sdp"
+            android:contentDescription="@string/app_name"
+            android:src="@drawable/baseline_web_24"
+            app:tint="@color/colorIcons" />
+
+
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/imageAddNoteMain"
+        android:layout_width="@dimen/_40sdp"
+        android:layout_height="@dimen/_40sdp"
+        android:layout_marginEnd="@dimen/_30sdp"
+        android:background="@drawable/backgrounf_add_button"
+        android:contentDescription="@string/app_name"
+        android:padding="@dimen/_5sdp"
+        android:src="@drawable/outline_add_24"
+        app:tint="@color/colorPrimary"
+        app:layout_constraintBottom_toTopOf="@id/layoutQuickActions"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/layoutQuickActions"/>
+
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
