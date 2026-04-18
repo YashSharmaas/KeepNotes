@@ -4,12 +4,12 @@ plugins {
 
 android {
     namespace 'com.example.yrmultimediaco.keepnotes'
-    compileSdk 33
+    compileSdk 34
 
     defaultConfig {
         applicationId "com.example.yrmultimediaco.keepnotes"
         minSdk 24
-        targetSdk 33
+        targetSdk 34
         versionCode 1
         versionName "1.0"
 
@@ -58,14 +58,14 @@ dependencies {
     implementation 'com.intuit.ssp:ssp-android:1.0.6'
 
     implementation 'com.makeramen:roundedimageview:2.3.0'
-    implementation 'com.airbnb.android:lottie:6.1.0'
+    //implementation 'com.airbnb.android:lottie:6.1.0'
     implementation 'com.mikepenz:materialdrawer:6.1.2'
     //implementation 'com.hanks:passcodeview:0.1.2'
 
     //implementation 'com.xeoh.android:text-highlighter:1.0.3'
 
     implementation 'androidx.biometric:biometric:1.1.0'
-    implementation 'com.airbnb.android:lottie:6.1.0'
+    //implementation 'com.airbnb.android:lottie:6.1.0'
 
 
 }
