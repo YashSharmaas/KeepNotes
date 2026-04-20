@@ -51,11 +51,14 @@ import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
+import com.example.yrmultimediaco.keepnotes.ai.AIHelper;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.io.InputStream;
 import java.text.Normalizer;
@@ -102,6 +105,8 @@ public class CreateNotesActivity extends AppCompatActivity{
     private static final String PREFS_NAME = "AlarmPrefs";
     private static final String KEY_TIMER_VISIBILITY = "timerVisibility";
     androidx.appcompat.widget.SearchView searchView ;
+    FloatingActionButton fabRephrase;
+    ProgressBar aiLoading;
 
 
     @Override
@@ -126,6 +131,9 @@ public class CreateNotesActivity extends AppCompatActivity{
         imageRemoveImage = findViewById(R.id.iamgeRemoveImage);
         imageRemoveUrl = findViewById(R.id.imagRemUrl);
         alarmTimerTextView = findViewById(R.id.alarmTimer);
+
+        fabRephrase = findViewById(R.id.fabRephrase);
+        aiLoading = findViewById(R.id.aiLoading);
 
         mDBhelper = new DBhelper(CreateNotesActivity.this);
 
@@ -193,6 +201,37 @@ public class CreateNotesActivity extends AppCompatActivity{
                 imageRemoveImage.setVisibility(View.GONE);
                 selectedPathImage = "";
             }
+        });
+
+        fabRephrase.setOnClickListener(v -> {
+
+            String text = noteDescription.getText().toString().trim();
+
+            if (text.isEmpty()) {
+                Toast.makeText(this, "Description is empty", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            aiLoading.setVisibility(View.VISIBLE);
+            fabRephrase.setEnabled(false);
+
+            new Thread(() -> {
+
+                String result = AIHelper.rephraseText(text);
+
+                runOnUiThread(() -> {
+
+                    aiLoading.setVisibility(View.GONE);
+                    fabRephrase.setEnabled(true);
+
+                    if (result.equals("Error")) {
+                        Toast.makeText(this, "AI failed. Try again.", Toast.LENGTH_SHORT).show();
+                    } else {
+                        noteDescription.setText(result);
+                    }
+                });
+
+            }).start();
         });
 
         initCustomizations();

@@ -2,6 +2,9 @@ plugins {
     id 'com.android.application'
 }
 
+Properties properties = new Properties()
+properties.load(project.rootProject.file('local.properties').newDataInputStream())
+
 android {
     namespace 'com.example.yrmultimediaco.keepnotes'
     compileSdk 34
@@ -13,7 +16,13 @@ android {
         versionCode 1
         versionName "1.0"
 
+        buildConfigField "String", "GEMINI_API_KEY", "\"${properties.getProperty('GEMINI_API_KEY')}\""
+
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildFeatures {
+        buildConfig true
     }
 
     buildTypes {
@@ -67,5 +76,6 @@ dependencies {
     implementation 'androidx.biometric:biometric:1.1.0'
     //implementation 'com.airbnb.android:lottie:6.1.0'
 
+    implementation 'com.squareup.okhttp3:okhttp:5.3.2'
 
 }
