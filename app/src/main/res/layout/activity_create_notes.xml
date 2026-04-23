@@ -109,7 +109,7 @@
                 android:layout_marginTop="@dimen/_15sdp"
                 android:layout_marginEnd="@dimen/_12sdp"
                 android:fontFamily="@font/ubuntu_bold"
-                android:hint="Note Title"
+                android:hint="@string/note_title"
                 android:imeOptions="actionDone"
                 android:importantForAutofill="no"
                 android:includeFontPadding="false"
@@ -154,7 +154,7 @@
                 android:layout_marginTop="@dimen/_15sdp"
                 android:layout_marginEnd="@dimen/_12sdp"
                 android:fontFamily="@font/ubuntu_medium"
-                android:hint="Subtitle Note"
+                android:hint="@string/subtitle_note"
                 android:importantForAutofill="no"
                 android:includeFontPadding="false"
                 android:inputType="textMultiLine"
@@ -190,7 +190,7 @@
                 app:layout_constraintTop_toBottomOf="@id/inputNoteSubTitle" />
 
             <ImageView
-                android:id="@+id/iamgeRemoveImage"
+                android:id="@+id/imageRemoveImage"
                 android:layout_width="@dimen/_25sdp"
                 android:layout_height="@dimen/_25sdp"
                 android:layout_marginTop="@dimen/_10sdp"
@@ -233,6 +233,7 @@
                     android:src="@drawable/baseline_delete_24"
                     app:tint="@color/colorDelete" />
 
+
             </LinearLayout>
 
 
@@ -268,15 +269,6 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent" />
 
-            <com.google.android.material.floatingactionbutton.FloatingActionButton
-                android:id="@+id/fabRephrase"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="bottom|end"
-                android:layout_margin="16dp"
-                android:src="@drawable/arrow_back"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </ScrollView>
