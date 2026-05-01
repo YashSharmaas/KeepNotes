@@ -34,6 +34,7 @@ import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.text.Editable;
@@ -69,6 +70,8 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.text.Normalizer;
 import java.text.SimpleDateFormat;
@@ -120,6 +123,7 @@ public class CreateNotesActivity extends AppCompatActivity{
     ProgressBar aiLoading;
     CheckBox checkIncludeSources;
     LinearLayout ai_layout_view;
+    private String lastProcessedInput = "";
 
 
     @Override
@@ -466,122 +470,75 @@ public class CreateNotesActivity extends AppCompatActivity{
         }
     }
 
-    /*private void processAIAndImage(String input) {
-        if (input == null || input.trim().isEmpty()) {
-            Toast.makeText(this, "Enter text first", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        aiLoading.setVisibility(View.VISIBLE);
-        fabRephrase.setEnabled(false);
-        voiceInput.setEnabled(false); // Lock voice button too
-
-        new Thread(() -> {
-            // STEP 1: Get AI Rephrase
-            String aiResult = AIHelper.rephraseText(input, checkIncludeSources.isChecked());
-
-            runOnUiThread(() -> {
-                // If it's an error, show the EXACT error so you know what's broken
-                if (aiResult.startsWith("Error")) {
-                    aiLoading.setVisibility(View.GONE);
-                    fabRephrase.setEnabled(true);
-                    voiceInput.setEnabled(true);
-                    Toast.makeText(this, aiResult, Toast.LENGTH_LONG).show();
-                    return;
-                }
-
-                // STEP 2: Extract Keyword and format text
-                String cleanNoteText = aiResult;
-                String keyword = "medicine"; // Fallback
-
-                if (aiResult.contains("KEYWORD:")) {
-                    int index = aiResult.indexOf("KEYWORD:");
-                    keyword = aiResult.substring(index + 8).trim();
-                    cleanNoteText = aiResult.substring(0, index).trim();
-                }
-
-                noteDescription.setText(cleanNoteText);
-
-                // STEP 3: Fetch image in background again
-                final String finalKeyword = keyword;
-                new Thread(() -> {
-                    String imageUrl = AIHelper.fetchImageUrl(finalKeyword);
-
-                    runOnUiThread(() -> {
-                        if (imageUrl != null) {
-                            imageNote.setVisibility(View.VISIBLE);
-                            imageRemoveImage.setVisibility(View.VISIBLE);
-
-                            Glide.with(CreateNotesActivity.this)
-                                    .load(imageUrl)
-                                    .listener(new RequestListener<Drawable>() {
-                                        @Override
-                                        public boolean onLoadFailed(@Nullable GlideException e, @Nullable Object model, @NonNull Target<Drawable> target, boolean isFirstResource) {
-                                            unlockUI();
-                                            return false;
-                                        }
-
-                                        @Override
-                                        public boolean onResourceReady(@NonNull Drawable resource, @NonNull Object model, Target<Drawable> target, @NonNull DataSource dataSource, boolean isFirstResource) {
-                                            unlockUI();
-                                            return false;
-                                        }
-                                    }).into(imageNote);
-                        } else {
-                            unlockUI();
-                        }
-                    });
-                }).start();
-            });
-        }).start();
-    }*/
-
     private void processAIAndImage(String input) {
-        if (input == null || input.trim().isEmpty()) {
+        String trimmedInput = input.trim();
+
+        if (trimmedInput.isEmpty()) {
             Toast.makeText(this, "Enter text first", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (trimmedInput.equalsIgnoreCase(lastProcessedInput)) {
+            Toast.makeText(this, "Already processed this text!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (trimmedInput.split("\\s+").length < 3) {
+            Toast.makeText(this, "Please enter at least 3 words for AI to work.", Toast.LENGTH_SHORT).show();
             return;
         }
 
         aiLoading.setVisibility(View.VISIBLE);
         fabRephrase.setEnabled(false);
-        voiceInput.setEnabled(false); // Lock voice button too
+        voiceInput.setEnabled(false);
 
         new Thread(() -> {
-            // STEP 1: Get AI Rephrase
-            String aiResult = AIHelper.rephraseText(input, checkIncludeSources.isChecked());
+            boolean wantSources = checkIncludeSources.isChecked();
+            String aiResult = AIHelper.rephraseText(trimmedInput, wantSources);
 
             runOnUiThread(() -> {
-                // Handle API error
                 if (aiResult.startsWith("Error")) {
                     unlockUI();
                     Toast.makeText(this, aiResult, Toast.LENGTH_LONG).show();
                     return;
                 }
 
-                // STEP 2: Extract Keyword and update Note description text
+                lastProcessedInput = trimmedInput;
+
                 String cleanNoteText = aiResult;
                 String keyword = "medicine"; // Fallback subject
+                String sourceUrl = "";
 
-                if (aiResult.contains("KEYWORD:")) {
-                    int index = aiResult.indexOf("KEYWORD:");
-                    keyword = aiResult.substring(index + 8).trim();
-                    cleanNoteText = aiResult.substring(0, index).trim();
+                if (cleanNoteText.contains("SOURCE:")) {
+                    int sourceIndex = cleanNoteText.indexOf("SOURCE:");
+                    sourceUrl = cleanNoteText.substring(sourceIndex + 7).trim();
+                    cleanNoteText = cleanNoteText.substring(0, sourceIndex).trim();
+                }
+
+                if (cleanNoteText.contains("KEYWORD:")) {
+                    int keywordIndex = cleanNoteText.indexOf("KEYWORD:");
+                    keyword = cleanNoteText.substring(keywordIndex + 8).trim();
+                    cleanNoteText = cleanNoteText.substring(0, keywordIndex).trim();
                 }
 
                 noteDescription.setText(cleanNoteText);
 
-                // STEP 3: Central Method to get image and handle saving sequentially
+                if (wantSources) {
+                    if (sourceUrl.isEmpty() || sourceUrl.equalsIgnoreCase("NONE") || sourceUrl.equalsIgnoreCase("[NONE]")) {
+                        Toast.makeText(CreateNotesActivity.this, "For this there isn't use any external source so link sources aren't available", Toast.LENGTH_SHORT).show();
+                    } else {
+                        textWebUrl.setText(sourceUrl);
+                        layoutWebUrl.setVisibility(View.VISIBLE);
+                    }
+                }
+
                 fetchAndSaveImage(keyword);
             });
         }).start();
     }
 
-    /**
-     * Sequential helper: Fetches URL, Downloads image, Saves it locally, updates UI with final local path[cite: AIHelper.java].
-     */
     private void fetchAndSaveImage(String keyword) {
         new Thread(() -> {
-            // A. Fetch Online Unsplash Image URL
             String imageUrl = AIHelper.fetchImageUrl(keyword);
 
             if (imageUrl == null || imageUrl.isEmpty()) {
@@ -592,14 +549,13 @@ public class CreateNotesActivity extends AppCompatActivity{
                 return;
             }
 
-            // B. Sequential: Wait for download and obtain the Bitmap via Glide
             Bitmap bitmap;
             try {
                 bitmap = Glide.with(this)
                         .asBitmap()
                         .load(imageUrl)
-                        .submit() // Seqeuential download request
-                        .get(); // Blocks this background thread until download is DONE
+                        .submit()
+                        .get();
             } catch (Exception e) {
                 runOnUiThread(() -> {
                     unlockUI();
@@ -608,68 +564,32 @@ public class CreateNotesActivity extends AppCompatActivity{
                 return;
             }
 
-            // C. CRITICAL Sequential Step: Save this actual downloaded bitmap as a local file[cite: AIHelper.java]
-            // We use standard Note architecture (which likely handles permission and directory creating)
-            // Replace the line below with whatever method your app uses to save images[cite: CreateNotesActivity.java].
-            // It MUST return a local file path (e.g., starting with "/storage...")
-            //String localPath = saveDownloadedImage(bitmap); // <- You need to create or call this method.
-            String localPath = "/storage/emulated/0/KeepNotes/DownloadedImages/test_image.jpg"; // Placeholder logic for now
+            String localPath = saveDownloadedImage(bitmap);
 
             runOnUiThread(() -> {
-                unlockUI(); // Final step in unlocking UI
+                unlockUI();
 
                 if (localPath == null || localPath.isEmpty()) {
                     Toast.makeText(this, "Image save failed on device.", Toast.LENGTH_SHORT).show();
                     return;
                 }
 
-                // D. Sequential: Update the UI with the final local path.
-                // When 'Save Note' is clicked, this path will be used for the DB[cite: CreateNotesActivity.java].
-                selectedPathImage = localPath; // This updates the database entry for saving.
+                selectedPathImage = localPath;
                 Log.d("SavingFix", "Final local image path ready: " + localPath);
 
                 imageNote.setVisibility(View.VISIBLE);
                 imageRemoveImage.setVisibility(View.VISIBLE);
-                imageNote.setImageBitmap(bitmap); // Display the actual downloaded bitmap directly
+                imageNote.setImageBitmap(bitmap);
             });
         }).start();
     }
 
-    // Helper to unlock UI
     private void unlockUI() {
         aiLoading.setVisibility(View.GONE);
         fabRephrase.setEnabled(true);
         voiceInput.setEnabled(true);
     }
 
-    private void extractAndShowLinks(String text) {
-        StringBuilder linksFound = new StringBuilder();
-        String[] words = text.split("\\s+");
-        for (String word : words) {
-            if (word.toLowerCase().startsWith("http")) {
-                linksFound.append(word).append("\n");
-            }
-        }
-
-        if (linksFound.length() > 0) {
-            layoutWebUrl.setVisibility(View.VISIBLE);
-            textWebUrl.setText(linksFound.toString().trim());
-            android.text.util.Linkify.addLinks(textWebUrl, android.text.util.Linkify.WEB_URLS);
-        }
-    }
-
-    private void updateNoteImage(String text) {
-        String keyword = "notes";
-        if (!text.isEmpty()) {
-            String[] words = text.split(" ");
-            // Use a word from the first few English sentences
-            keyword = words.length > 5 ? words[3] : words[0];
-        }
-
-        String imageUrl = "https://source.unsplash.com/600x400/?" + keyword;
-        imageNote.setVisibility(View.VISIBLE);
-        Glide.with(this).load(imageUrl).into(imageNote);
-    }
 
     public void highlightText(Editable editableText, String textToHighlight) {
         String tvt = editableText.toString();
@@ -686,7 +606,34 @@ public class CreateNotesActivity extends AppCompatActivity{
     }
 
 
+    private String saveDownloadedImage(Bitmap bitmap) {
+        try {
+            File directory = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), "KeepNotesAIImages");
 
+            if (!directory.exists()) {
+                boolean isCreated = directory.mkdirs();
+                if (!isCreated) {
+                    Log.e("SaveImage", "Failed to create directory");
+                    return null;
+                }
+            }
+
+            String fileName = "AI_Image_" + System.currentTimeMillis() + ".jpg";
+            File imageFile = new File(directory, fileName);
+
+            FileOutputStream fos = new FileOutputStream(imageFile);
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+            fos.flush();
+            fos.close();
+
+            return imageFile.getAbsolutePath();
+
+        } catch (Exception e) {
+            Log.e("SaveImage", "Error saving image: " + e.getMessage());
+            e.printStackTrace();
+            return null;
+        }
+    }
 
 
     private void initCustomizations(){  //initCustomizations is equivalent to initMisellaneous
