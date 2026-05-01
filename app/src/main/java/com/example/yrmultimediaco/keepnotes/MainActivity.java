@@ -1088,7 +1088,7 @@ public class MainActivity extends AppCompatActivity implements CreateNotesAdapte
                     }
                 }
             }*/
-            else if (idOption == R.id.layoutShortcutNote) {
+            /*else if (idOption == R.id.layoutShortcutNote) {
                 if (selectedAdapter != null) {
                     if (!selectedAdapter.isNoteLock()) {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -1138,7 +1138,7 @@ public class MainActivity extends AppCompatActivity implements CreateNotesAdapte
                         }
                     }
                 }
-            }
+            }*/
             else if (idOption == R.id.layoutLockNote) {
                 boolean isLockNoteState = !selectedAdapter.isNoteLock();
 
