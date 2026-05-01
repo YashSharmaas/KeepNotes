@@ -13,18 +13,19 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
-import androidx.core.content.pm.ShortcutInfoCompat;
-import androidx.core.content.pm.ShortcutManagerCompat;
-import androidx.core.graphics.drawable.IconCompat;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
 import android.Manifest;
-import android.app.PendingIntent;
+import android.appwidget.AppWidgetHost;
+import android.appwidget.AppWidgetHostView;
+import android.appwidget.AppWidgetManager;
+import android.appwidget.AppWidgetProviderInfo;
 import android.content.ClipData;
 import android.content.ClipboardManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -34,7 +35,10 @@ import android.content.pm.ShortcutInfo;
 import android.content.pm.ShortcutManager;
 import android.content.res.Configuration;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Icon;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Build;
@@ -90,9 +94,9 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements CreateNotesAdapter.OnBtnDetailClickListener, NotesDetailBottomSheetFragment.NotesDetailBottomSheetFragmentListener, ItemTouchCallback {
 
-    private HashSet<String> colorListsSet = new HashSet<>();
+    private final HashSet<String> colorListsSet = new HashSet<>();
 
-    private boolean moveToTrash = false;
+    private final boolean moveToTrash = false;
     RecyclerView notesRecView;
     FastAdapter<AbstractItem> fastAdapter;
     ItemAdapter<AbstractItem> itemAdapter;
@@ -535,7 +539,7 @@ public class MainActivity extends AppCompatActivity implements CreateNotesAdapte
                 .withActivity(this)
                 //.withHeaderBackground(R.drawable.header)
                 .addProfiles(
-                        new ProfileDrawerItem().withName("Keep Notes").withIcon(getResources().getDrawable(R.drawable.baseline_edit_note_24))
+                        new ProfileDrawerItem().withName(R.string.app_name).withIcon(getResources().getDrawable(R.drawable.baseline_edit_note_24))
                 )
                 /*.withOnAccountHeaderListener(new AccountHeader.OnAccountHeaderListener() {
                     @Override
@@ -555,6 +559,11 @@ public class MainActivity extends AppCompatActivity implements CreateNotesAdapte
                 .colorRes(isDarkMode ? R.color.white : com.mikepenz.materialdrawer.R.color.md_black_1000));
         SecondaryDrawerItem item5 = new SecondaryDrawerItem().withIdentifier(5).withName("Archives").withIcon(new IconicsDrawable(this, CommunityMaterial.Icon2.cmd_inbox_arrow_down)
                 .colorRes(isDarkMode ? R.color.white : com.mikepenz.materialdrawer.R.color.md_black_1000));
+//        SecondaryDrawerItem item6 = new SecondaryDrawerItem().withIdentifier(6).withName("Add Widget").withIcon(new IconicsDrawable(this, CommunityMaterial.Icon2.cmd_widgets)
+//                .colorRes(isDarkMode ? R.color.white : com.mikepenz.materialdrawer.R.color.md_black_1000));
+
+//        AppWidgetHost mAppWidgetHost = new AppWidgetHost(context, R.id.APPWIDGET_HOST_ID);
+//        mAppWidgetHost.startListening();
 
 
         Drawer result = new DrawerBuilder()
@@ -569,6 +578,7 @@ public class MainActivity extends AppCompatActivity implements CreateNotesAdapte
                         item3,
                         item4,
                         item5
+                        //item6
                 ).withOnDrawerItemClickListener((view, position, drawerItem) -> {
 
                     long identifier = drawerItem.getIdentifier();
@@ -582,7 +592,25 @@ public class MainActivity extends AppCompatActivity implements CreateNotesAdapte
                         applyFilter(NoteFilter.FAV);
                     } else if (identifier == 5) {
                         startActivity(new Intent(getApplicationContext(), ArchivedNotesActivity.class));
-                    }
+                    } /*else if (identifier == 6) {
+                        AppWidgetHost appWidgetHost = new AppWidgetHost(context, R.id.APPWIDGET_HOST_ID);
+
+                        // Get an app widget ID
+                        int appWidgetId = appWidgetHost.allocateAppWidgetId();
+
+                        // Replace MyWidgetProvider with your widget provider class
+                        ComponentName myWidgetProvider = new ComponentName(context, MyWidgetProvider.class);
+
+                        // Create the AppWidgetHostView
+                        AppWidgetHostView hostView = appWidgetHost.createView(context, appWidgetId, myWidgetProvider);
+
+                        // Add the widget view to the home screen
+                        AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
+                        appWidgetManager.updateAppWidget(appWidgetId, hostView.getAppWidgetInfo());
+
+                        // Show a message indicating that the widget has been added to the home screen
+                        Toast.makeText(context, "Widget added to home screen", Toast.LENGTH_SHORT).show();
+                    }*/
 
                     return false;
                 })
@@ -606,6 +634,20 @@ public class MainActivity extends AppCompatActivity implements CreateNotesAdapte
             super.onBackPressed(); // Perform default back button behavior
         }
     }
+
+    private AppWidgetProviderInfo getAppWidgetInfo(Context context, ComponentName componentName) {
+        AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
+        List<AppWidgetProviderInfo> appWidgetInfos = appWidgetManager.getInstalledProviders();
+
+        for (AppWidgetProviderInfo appWidgetInfo : appWidgetInfos) {
+            if (appWidgetInfo.provider.equals(componentName)) {
+                return appWidgetInfo;
+            }
+        }
+
+        return null;
+    }
+
 
     private void loadLabels() {
 
@@ -975,7 +1017,7 @@ public class MainActivity extends AppCompatActivity implements CreateNotesAdapte
             } /*else if (idOption == R.id.layoutShortcutNote) {
                 if (selectedAdapter != null) {
                     if (!selectedAdapter.isNoteLock()) {
-                        // Log a message to indicate that this block is being executed
+                       *//* // Log a message to indicate that this block is being executed
                         Log.d("ShortcutNote", "Creating shortcut...");
 
                         Intent shortCutIntent = new Intent(this, MainActivity.class);
@@ -1001,9 +1043,102 @@ public class MainActivity extends AppCompatActivity implements CreateNotesAdapte
 
                     } else {
                         Toast.makeText(this, "This note is locked. Unlock to Make Shortcut", Toast.LENGTH_SHORT).show();
+                    }*//*
+
+                        Intent shortcutIntent = new Intent(getApplicationContext(), CreateNotesActivity.class);
+                        shortcutIntent.setAction(Intent.ACTION_VIEW);
+                        shortcutIntent.putExtra("note_id", selectedAdapter.getId()); // Pass the note ID or any necessary data
+                        shortcutIntent.putExtra("note_title", selectedAdapter.getTitle());
+                        shortcutIntent.putExtra("note_subTitle", selectedAdapter.getSubTitle());
+                        shortcutIntent.putExtra("note_desc", selectedAdapter.getDescription());
+                        shortcutIntent.putExtra("get_url", selectedAdapter.getUrl());
+                        shortcutIntent.putExtra("image_path", selectedAdapter.getImagePath());
+                        shortcutIntent.putExtra("sub_title_indicator_color", selectedAdapter.getColor());
+
+                        String imagePath = selectedAdapter.getImagePath();
+                        Bitmap iconBitmap = BitmapFactory.decodeFile(imagePath);
+
+                        ShortcutInfo shortcut;
+
+                        if (iconBitmap != null){
+                            Icon icon = Icon.createWithBitmap(iconBitmap);
+
+                            shortcut = new ShortcutInfo.Builder(this, "note_shortcut_" + selectedAdapter.getId())
+                                    .setShortLabel(selectedAdapter.getTitle()) // Short label for the shortcut
+                                    .setLongLabel(selectedAdapter.getTitle())  // Long label for the shortcut
+                                    .setIcon(icon) // Icon for the shortcut
+                                    .setIntent(shortcutIntent)
+                                    .build();
+                        }  else {
+                            shortcut = new ShortcutInfo.Builder(this, "note_shortcut_" + selectedAdapter.getId())
+                                    .setShortLabel(selectedAdapter.getTitle()) // Short label for the shortcut
+                                    .setLongLabel(selectedAdapter.getTitle())  // Long label for the shortcut
+                                    .setIcon(Icon.createWithResource(getApplicationContext(), R.mipmap.ic_launcher)) // Icon for the shortcut
+                                    .setIntent(shortcutIntent)
+                                    .build();
+                        }
+
+
+                        ShortcutManager shortcutManager = getSystemService(ShortcutManager.class);
+                        if (shortcutManager != null) {
+                            shortcutManager.addDynamicShortcuts(Collections.singletonList(shortcut));
+                            Log.d("ShortcutNote", "Shortcut created for note: " + selectedAdapter.getTitle());
+                        }
+
                     }
                 }
             }*/
+            else if (idOption == R.id.layoutShortcutNote) {
+                if (selectedAdapter != null) {
+                    if (!selectedAdapter.isNoteLock()) {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                            ShortcutManager shortcutManager = getSystemService(ShortcutManager.class);
+
+                            if (shortcutManager != null) {
+                                // Create an intent to open the CreateNotesActivity with the necessary data
+                                Intent shortcutIntent = new Intent(getApplicationContext(), CreateNotesActivity.class);
+                                shortcutIntent.setAction(Intent.ACTION_VIEW);
+                                shortcutIntent.putExtra("note_id", selectedAdapter.getId()); // Pass the note ID or any necessary data
+                                shortcutIntent.putExtra("note_title", selectedAdapter.getTitle());
+                                shortcutIntent.putExtra("note_subTitle", selectedAdapter.getSubTitle());
+                                shortcutIntent.putExtra("note_desc", selectedAdapter.getDescription());
+                                shortcutIntent.putExtra("get_url", selectedAdapter.getUrl());
+                                shortcutIntent.putExtra("image_path", selectedAdapter.getImagePath());
+                                shortcutIntent.putExtra("sub_title_indicator_color", selectedAdapter.getColor());
+
+                                String imagePath = selectedAdapter.getImagePath();
+                                Bitmap iconBitmap = BitmapFactory.decodeFile(imagePath);
+
+                                ShortcutInfo shortcut;
+
+                                if (iconBitmap != null){
+                                    Icon icon = Icon.createWithBitmap(iconBitmap);
+
+                                    shortcut = new ShortcutInfo.Builder(this, "note_shortcut_" + selectedAdapter.getId())
+                                            .setShortLabel(selectedAdapter.getTitle()) // Short label for the shortcut
+                                            .setLongLabel(selectedAdapter.getTitle())  // Long label for the shortcut
+                                            .setIcon(icon) // Icon for the shortcut
+                                            .setIntent(shortcutIntent)
+                                            .build();
+
+                                    // Request to pin the shortcut to the home screen
+                                    shortcutManager.requestPinShortcut(shortcut, null);
+                                }  else {
+                                    shortcut = new ShortcutInfo.Builder(this, "note_shortcut_" + selectedAdapter.getId())
+                                            .setShortLabel(selectedAdapter.getTitle()) // Short label for the shortcut
+                                            .setLongLabel(selectedAdapter.getTitle())  // Long label for the shortcut
+                                            .setIcon(Icon.createWithResource(getApplicationContext(), R.mipmap.ic_launcher)) // Icon for the shortcut
+                                            .setIntent(shortcutIntent)
+                                            .build();
+
+                                    // Request to pin the shortcut to the home screen
+                                    shortcutManager.requestPinShortcut(shortcut, null);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
             else if (idOption == R.id.layoutLockNote) {
                 boolean isLockNoteState = !selectedAdapter.isNoteLock();
 
@@ -1098,6 +1233,65 @@ public class MainActivity extends AppCompatActivity implements CreateNotesAdapte
             }
 
         }
+    }
+
+    private Intent createNoteShortcutIntent(CreateNotesAdapter selectedAdapter){
+
+        Intent shortcutIntent = new Intent(getApplicationContext(), CreateNotesActivity.class);
+        shortcutIntent.setAction(Intent.ACTION_VIEW);
+
+        // Pass the note details as extras (customize this part based on your data model)
+        shortcutIntent.putExtra("note_id", selectedAdapter.getId());
+        shortcutIntent.putExtra("note_title", selectedAdapter.getTitle());
+        shortcutIntent.putExtra("note_subTitle", selectedAdapter.getSubTitle());
+        shortcutIntent.putExtra("note_desc", selectedAdapter.getDescription());
+        shortcutIntent.putExtra("get_url", selectedAdapter.getUrl());
+        shortcutIntent.putExtra("image_path", selectedAdapter.getImagePath());
+        shortcutIntent.putExtra("sub_title_indicator_color", selectedAdapter.getColor());
+
+        return shortcutIntent;
+
+        /*Intent shortcutIntent = new Intent(getApplicationContext(), CreateNotesActivity.class);
+        shortcutIntent.setAction(Intent.ACTION_VIEW);
+        shortcutIntent.putExtra("note_id", selectedAdapter.getId()); // Pass the note ID or any necessary data
+        shortcutIntent.putExtra("note_title", selectedAdapter.getTitle());
+        shortcutIntent.putExtra("note_subTitle", selectedAdapter.getSubTitle());
+        shortcutIntent.putExtra("note_desc", selectedAdapter.getDescription());
+        shortcutIntent.putExtra("get_url", selectedAdapter.getUrl());
+        shortcutIntent.putExtra("image_path", selectedAdapter.getImagePath());
+        shortcutIntent.putExtra("sub_title_indicator_color", selectedAdapter.getColor());
+
+        String imagePath = selectedAdapter.getImagePath();
+        Bitmap iconBitmap = BitmapFactory.decodeFile(imagePath);
+
+        ShortcutInfo shortcut;
+
+        if (iconBitmap != null){
+            Icon icon = Icon.createWithBitmap(iconBitmap);
+
+            shortcut = new ShortcutInfo.Builder(this, "note_shortcut_" + selectedAdapter.getId())
+                    .setShortLabel(selectedAdapter.getTitle()) // Short label for the shortcut
+                    .setLongLabel(selectedAdapter.getTitle())  // Long label for the shortcut
+                    .setIcon(icon) // Icon for the shortcut
+                    .setIntent(shortcutIntent)
+                    .build();
+        }  else {
+            shortcut = new ShortcutInfo.Builder(this, "note_shortcut_" + selectedAdapter.getId())
+                    .setShortLabel(selectedAdapter.getTitle()) // Short label for the shortcut
+                    .setLongLabel(selectedAdapter.getTitle())  // Long label for the shortcut
+                    .setIcon(Icon.createWithResource(getApplicationContext(), R.mipmap.ic_launcher)) // Icon for the shortcut
+                    .setIntent(shortcutIntent)
+                    .build();
+        }
+
+
+        ShortcutManager shortcutManager = getSystemService(ShortcutManager.class);
+        if (shortcutManager != null) {
+            shortcutManager.addDynamicShortcuts(Collections.singletonList(shortcut));
+            Log.d("ShortcutNote", "Shortcut created for note: " + selectedAdapter.getTitle());
+        }
+
+        return false;*/
     }
 
     private boolean isExternalStorageWritable() {
@@ -1948,9 +2142,6 @@ private List<AbstractItem> getSelectedNotes(){
             noFilesFoundView.setVisibility(View.GONE);
         }
     }
-
-
-
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
