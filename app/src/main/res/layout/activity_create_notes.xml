@@ -109,7 +109,7 @@
                 android:layout_marginTop="@dimen/_15sdp"
                 android:layout_marginEnd="@dimen/_12sdp"
                 android:fontFamily="@font/ubuntu_bold"
-                android:hint="Note Title"
+                android:hint="@string/note_title"
                 android:imeOptions="actionDone"
                 android:importantForAutofill="no"
                 android:includeFontPadding="false"
@@ -154,7 +154,7 @@
                 android:layout_marginTop="@dimen/_15sdp"
                 android:layout_marginEnd="@dimen/_12sdp"
                 android:fontFamily="@font/ubuntu_medium"
-                android:hint="Subtitle Note"
+                android:hint="@string/subtitle_note"
                 android:importantForAutofill="no"
                 android:includeFontPadding="false"
                 android:inputType="textMultiLine"
@@ -190,7 +190,7 @@
                 app:layout_constraintTop_toBottomOf="@id/inputNoteSubTitle" />
 
             <ImageView
-                android:id="@+id/iamgeRemoveImage"
+                android:id="@+id/imageRemoveImage"
                 android:layout_width="@dimen/_25sdp"
                 android:layout_height="@dimen/_25sdp"
                 android:layout_marginTop="@dimen/_10sdp"
@@ -233,6 +233,7 @@
                     android:src="@drawable/baseline_delete_24"
                     app:tint="@color/colorDelete" />
 
+
             </LinearLayout>
 
 
@@ -257,6 +258,16 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/layoutWebUrl" />
 
+            <ProgressBar
+                android:id="@+id/aiLoading"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_gravity="center"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
