@@ -29,6 +29,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.Build;
@@ -56,13 +57,22 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
 import com.example.yrmultimediaco.keepnotes.ai.AIHelper;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import java.io.InputStream;
 import java.text.Normalizer;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
@@ -73,6 +83,7 @@ public class CreateNotesActivity extends AppCompatActivity{
     boolean is_storage_image_permitted = false;
     LinearLayout linearMiscellaneous;
     BottomSheetBehavior<LinearLayout> bottomSheetBehavior;
+    ImageView voiceInput;
     ImageView imageBack, addNotes, imageNote;
     ImageView imageColor1;
     ImageView imageColor2;
@@ -107,6 +118,8 @@ public class CreateNotesActivity extends AppCompatActivity{
     androidx.appcompat.widget.SearchView searchView ;
     FloatingActionButton fabRephrase;
     ProgressBar aiLoading;
+    CheckBox checkIncludeSources;
+    LinearLayout ai_layout_view;
 
 
     @Override
@@ -128,11 +141,10 @@ public class CreateNotesActivity extends AppCompatActivity{
         layoutWebUrl = findViewById(R.id.layoutWebUrl);
         reminderImg = findViewById(R.id.addReminder);
         linearMiscellaneous = findViewById(R.id.layoutMiscellaneous);
-        imageRemoveImage = findViewById(R.id.iamgeRemoveImage);
+        imageRemoveImage = findViewById(R.id.imageRemoveImage);
         imageRemoveUrl = findViewById(R.id.imagRemUrl);
         alarmTimerTextView = findViewById(R.id.alarmTimer);
 
-        fabRephrase = findViewById(R.id.fabRephrase);
         aiLoading = findViewById(R.id.aiLoading);
 
         mDBhelper = new DBhelper(CreateNotesActivity.this);
@@ -201,37 +213,6 @@ public class CreateNotesActivity extends AppCompatActivity{
                 imageRemoveImage.setVisibility(View.GONE);
                 selectedPathImage = "";
             }
-        });
-
-        fabRephrase.setOnClickListener(v -> {
-
-            String text = noteDescription.getText().toString().trim();
-
-            if (text.isEmpty()) {
-                Toast.makeText(this, "Description is empty", Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-            aiLoading.setVisibility(View.VISIBLE);
-            fabRephrase.setEnabled(false);
-
-            new Thread(() -> {
-
-                String result = AIHelper.rephraseText(text);
-
-                runOnUiThread(() -> {
-
-                    aiLoading.setVisibility(View.GONE);
-                    fabRephrase.setEnabled(true);
-
-                    if (result.equals("Error")) {
-                        Toast.makeText(this, "AI failed. Try again.", Toast.LENGTH_SHORT).show();
-                    } else {
-                        noteDescription.setText(result);
-                    }
-                });
-
-            }).start();
         });
 
         initCustomizations();
@@ -438,11 +419,11 @@ public class CreateNotesActivity extends AppCompatActivity{
                     Bitmap imageBitmap = BitmapFactory.decodeFile(selectedPathImage);
                     Log.d("ImagePath", selectedPathImage);
                     Log.d("ImageView", "imageNote: " + (imageNote != null));
-                    Log.d("View", "imageRemoveImage: " + (findViewById(R.id.iamgeRemoveImage) != null));
+                    Log.d("View", "imageRemoveImage: " + (findViewById(R.id.imageRemoveImage) != null));
 
                     imageNote.setImageBitmap(imageBitmap);
                     imageNote.setVisibility(View.VISIBLE);
-                    findViewById(R.id.iamgeRemoveImage).setVisibility(View.VISIBLE);
+                    findViewById(R.id.imageRemoveImage).setVisibility(View.VISIBLE);
                 } else if (type.equals("URL")) {
 
                     textWebUrl.setText(getIntent().getStringExtra("URL"));
@@ -470,6 +451,225 @@ public class CreateNotesActivity extends AppCompatActivity{
         // Update the Editable text with spans
         editableText.replace(0, editableText.length(), wordToSpan);
     }*/
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == 100 && resultCode == RESULT_OK && data != null) {
+            ArrayList<String> result = data.getStringArrayListExtra(
+                    android.speech.RecognizerIntent.EXTRA_RESULTS);
+
+            if (result == null || result.isEmpty()) return;
+            String spokenText = result.get(0);
+
+            processAIAndImage(spokenText);
+        }
+    }
+
+    /*private void processAIAndImage(String input) {
+        if (input == null || input.trim().isEmpty()) {
+            Toast.makeText(this, "Enter text first", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        aiLoading.setVisibility(View.VISIBLE);
+        fabRephrase.setEnabled(false);
+        voiceInput.setEnabled(false); // Lock voice button too
+
+        new Thread(() -> {
+            // STEP 1: Get AI Rephrase
+            String aiResult = AIHelper.rephraseText(input, checkIncludeSources.isChecked());
+
+            runOnUiThread(() -> {
+                // If it's an error, show the EXACT error so you know what's broken
+                if (aiResult.startsWith("Error")) {
+                    aiLoading.setVisibility(View.GONE);
+                    fabRephrase.setEnabled(true);
+                    voiceInput.setEnabled(true);
+                    Toast.makeText(this, aiResult, Toast.LENGTH_LONG).show();
+                    return;
+                }
+
+                // STEP 2: Extract Keyword and format text
+                String cleanNoteText = aiResult;
+                String keyword = "medicine"; // Fallback
+
+                if (aiResult.contains("KEYWORD:")) {
+                    int index = aiResult.indexOf("KEYWORD:");
+                    keyword = aiResult.substring(index + 8).trim();
+                    cleanNoteText = aiResult.substring(0, index).trim();
+                }
+
+                noteDescription.setText(cleanNoteText);
+
+                // STEP 3: Fetch image in background again
+                final String finalKeyword = keyword;
+                new Thread(() -> {
+                    String imageUrl = AIHelper.fetchImageUrl(finalKeyword);
+
+                    runOnUiThread(() -> {
+                        if (imageUrl != null) {
+                            imageNote.setVisibility(View.VISIBLE);
+                            imageRemoveImage.setVisibility(View.VISIBLE);
+
+                            Glide.with(CreateNotesActivity.this)
+                                    .load(imageUrl)
+                                    .listener(new RequestListener<Drawable>() {
+                                        @Override
+                                        public boolean onLoadFailed(@Nullable GlideException e, @Nullable Object model, @NonNull Target<Drawable> target, boolean isFirstResource) {
+                                            unlockUI();
+                                            return false;
+                                        }
+
+                                        @Override
+                                        public boolean onResourceReady(@NonNull Drawable resource, @NonNull Object model, Target<Drawable> target, @NonNull DataSource dataSource, boolean isFirstResource) {
+                                            unlockUI();
+                                            return false;
+                                        }
+                                    }).into(imageNote);
+                        } else {
+                            unlockUI();
+                        }
+                    });
+                }).start();
+            });
+        }).start();
+    }*/
+
+    private void processAIAndImage(String input) {
+        if (input == null || input.trim().isEmpty()) {
+            Toast.makeText(this, "Enter text first", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        aiLoading.setVisibility(View.VISIBLE);
+        fabRephrase.setEnabled(false);
+        voiceInput.setEnabled(false); // Lock voice button too
+
+        new Thread(() -> {
+            // STEP 1: Get AI Rephrase
+            String aiResult = AIHelper.rephraseText(input, checkIncludeSources.isChecked());
+
+            runOnUiThread(() -> {
+                // Handle API error
+                if (aiResult.startsWith("Error")) {
+                    unlockUI();
+                    Toast.makeText(this, aiResult, Toast.LENGTH_LONG).show();
+                    return;
+                }
+
+                // STEP 2: Extract Keyword and update Note description text
+                String cleanNoteText = aiResult;
+                String keyword = "medicine"; // Fallback subject
+
+                if (aiResult.contains("KEYWORD:")) {
+                    int index = aiResult.indexOf("KEYWORD:");
+                    keyword = aiResult.substring(index + 8).trim();
+                    cleanNoteText = aiResult.substring(0, index).trim();
+                }
+
+                noteDescription.setText(cleanNoteText);
+
+                // STEP 3: Central Method to get image and handle saving sequentially
+                fetchAndSaveImage(keyword);
+            });
+        }).start();
+    }
+
+    /**
+     * Sequential helper: Fetches URL, Downloads image, Saves it locally, updates UI with final local path[cite: AIHelper.java].
+     */
+    private void fetchAndSaveImage(String keyword) {
+        new Thread(() -> {
+            // A. Fetch Online Unsplash Image URL
+            String imageUrl = AIHelper.fetchImageUrl(keyword);
+
+            if (imageUrl == null || imageUrl.isEmpty()) {
+                runOnUiThread(() -> {
+                    unlockUI();
+                    Toast.makeText(this, "Note saved without image.", Toast.LENGTH_SHORT).show();
+                });
+                return;
+            }
+
+            // B. Sequential: Wait for download and obtain the Bitmap via Glide
+            Bitmap bitmap;
+            try {
+                bitmap = Glide.with(this)
+                        .asBitmap()
+                        .load(imageUrl)
+                        .submit() // Seqeuential download request
+                        .get(); // Blocks this background thread until download is DONE
+            } catch (Exception e) {
+                runOnUiThread(() -> {
+                    unlockUI();
+                    Toast.makeText(this, "Image download failed.", Toast.LENGTH_SHORT).show();
+                });
+                return;
+            }
+
+            // C. CRITICAL Sequential Step: Save this actual downloaded bitmap as a local file[cite: AIHelper.java]
+            // We use standard Note architecture (which likely handles permission and directory creating)
+            // Replace the line below with whatever method your app uses to save images[cite: CreateNotesActivity.java].
+            // It MUST return a local file path (e.g., starting with "/storage...")
+            //String localPath = saveDownloadedImage(bitmap); // <- You need to create or call this method.
+            String localPath = "/storage/emulated/0/KeepNotes/DownloadedImages/test_image.jpg"; // Placeholder logic for now
+
+            runOnUiThread(() -> {
+                unlockUI(); // Final step in unlocking UI
+
+                if (localPath == null || localPath.isEmpty()) {
+                    Toast.makeText(this, "Image save failed on device.", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                // D. Sequential: Update the UI with the final local path.
+                // When 'Save Note' is clicked, this path will be used for the DB[cite: CreateNotesActivity.java].
+                selectedPathImage = localPath; // This updates the database entry for saving.
+                Log.d("SavingFix", "Final local image path ready: " + localPath);
+
+                imageNote.setVisibility(View.VISIBLE);
+                imageRemoveImage.setVisibility(View.VISIBLE);
+                imageNote.setImageBitmap(bitmap); // Display the actual downloaded bitmap directly
+            });
+        }).start();
+    }
+
+    // Helper to unlock UI
+    private void unlockUI() {
+        aiLoading.setVisibility(View.GONE);
+        fabRephrase.setEnabled(true);
+        voiceInput.setEnabled(true);
+    }
+
+    private void extractAndShowLinks(String text) {
+        StringBuilder linksFound = new StringBuilder();
+        String[] words = text.split("\\s+");
+        for (String word : words) {
+            if (word.toLowerCase().startsWith("http")) {
+                linksFound.append(word).append("\n");
+            }
+        }
+
+        if (linksFound.length() > 0) {
+            layoutWebUrl.setVisibility(View.VISIBLE);
+            textWebUrl.setText(linksFound.toString().trim());
+            android.text.util.Linkify.addLinks(textWebUrl, android.text.util.Linkify.WEB_URLS);
+        }
+    }
+
+    private void updateNoteImage(String text) {
+        String keyword = "notes";
+        if (!text.isEmpty()) {
+            String[] words = text.split(" ");
+            // Use a word from the first few English sentences
+            keyword = words.length > 5 ? words[3] : words[0];
+        }
+
+        String imageUrl = "https://source.unsplash.com/600x400/?" + keyword;
+        imageNote.setVisibility(View.VISIBLE);
+        Glide.with(this).load(imageUrl).into(imageNote);
+    }
 
     public void highlightText(Editable editableText, String textToHighlight) {
         String tvt = editableText.toString();
@@ -502,6 +702,12 @@ public class CreateNotesActivity extends AppCompatActivity{
                 }
             }
         });
+
+        ai_layout_view = linearMiscellaneous.findViewById(R.id.ai_layout_view);
+
+        fabRephrase = linearMiscellaneous.findViewById(R.id.fabRephrase);
+        checkIncludeSources = linearMiscellaneous.findViewById(R.id.checkIncludeSources);
+        voiceInput = linearMiscellaneous.findViewById(R.id.voiceInput);
 
          imageColor1 = linearMiscellaneous.findViewById(R.id.image_color1);
          imageColor2 = linearMiscellaneous.findViewById(R.id.image_color2);
@@ -604,7 +810,29 @@ if (isUpdatingExistingNote) {
     });
 }
 
+        fabRephrase.setOnClickListener(v -> {
+            String inputText = noteDescription.getText().toString();
+            processAIAndImage(inputText);
+        });
 
+        voiceInput.setOnClickListener(v -> {
+            Intent intent = new Intent(android.speech.RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+
+            intent.putExtra(android.speech.RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                    android.speech.RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+
+            intent.putExtra(android.speech.RecognizerIntent.EXTRA_LANGUAGE, "en-IN");
+            intent.putExtra(android.speech.RecognizerIntent.EXTRA_PROMPT, "Speak now...");
+
+            intent.putExtra(android.speech.RecognizerIntent.EXTRA_SPEECH_INPUT_MINIMUM_LENGTH_MILLIS, 8000);
+            intent.putExtra(android.speech.RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, 3000);
+            intent.putExtra(android.speech.RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS, 3000);
+            try {
+                startActivityForResult(intent, 100);
+            } catch (Exception e) {
+                Toast.makeText(this, "Voice not supported", Toast.LENGTH_SHORT).show();
+            }
+        });
 
     }
 
